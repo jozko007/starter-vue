@@ -2,7 +2,7 @@
   <div>
     <p class="decode-result">Last result: <b>{{ result }}</b></p>
 
-    <qrcode-stream :camera="camera" @decode="onDecode" @init="onInit">
+    <QrcodeStream :camera="camera" @decode="onDecode" @init="onInit">
       <div v-show="cameraForzen" class="validation-layer">
         <div class="validation-notice" v-if="validating">
           Long validation in progress...
@@ -18,13 +18,18 @@
           </div>
         </div>
       </div>
-    </qrcode-stream>
+    </QrcodeStream>
   </div>
 </template>
 
 <script>
 import { firestore } from "./firebase";
+ /* eslint-disable */
+ import { QrcodeStream } from 'vue3-qrcode-reader';
 export default {
+  components: {
+    QrcodeStream
+  },
   data () {
     return {
       isValid: false,
@@ -66,7 +71,7 @@ export default {
 
     startCamera () {
       // use default settings
-      this.camera = true
+      this.camera = null
     },
 
     validate (content) {
