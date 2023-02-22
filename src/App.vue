@@ -25,7 +25,7 @@
 <script>
 import { firestore } from "./firebase";
  /* eslint-disable */
- import { QrcodeStream } from 'vue3-qrcode-reader';
+ import { QrcodeStream } from 'vue-qrcode-reader';
 export default {
   components: {
     QrcodeStream
@@ -57,8 +57,7 @@ export default {
       this.validating = true
       this.isValid = await this.validate(content)
       this.validating = false
-      /* eslint-disable */
-      console.log(this.validating);
+  
 
       window.setTimeout(() => {
         this.startCamera()
@@ -71,7 +70,7 @@ export default {
 
     startCamera () {
       // use default settings
-      this.camera = null
+      this.camera = true
     },
 
     validate (content) {
