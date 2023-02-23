@@ -70,7 +70,7 @@ export default {
 
     startCamera () {
       // use default settings
-      this.camera = true
+      this.camera = {}
     },
 
     validate (content) {
