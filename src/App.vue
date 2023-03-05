@@ -23,18 +23,19 @@
 </template>
 
 <script>
-import { firestore } from "./firebase";
- /* eslint-disable */
- import { QrcodeStream } from 'vue-qrcode-reader';
+import {firestore} from "./firebase";
+/* eslint-disable */
+import { QrcodeStream } from 'vue-qrcode-reader'
+
 export default {
   components: {
     QrcodeStream
   },
-  data () {
+  data() {
     return {
       isValid: false,
       validating: false,
-      camera: {},
+      camera: 'auto',
       result: null,
 
       loading: false,
@@ -43,13 +44,13 @@ export default {
   },
 
   computed: {
-    cameraForzen () {
-      return this.camera === false || (this.loading && !this.firstLoad)
+    cameraForzen() {
+      return this.camera === 'off' || (this.loading && !this.firstLoad)
     }
   },
 
   methods: {
-    async onDecode (content) {
+    async onDecode(content) {
       this.result = content
 
       this.stopCamera()
@@ -57,36 +58,39 @@ export default {
       this.validating = true
       this.isValid = await this.validate(content)
       this.validating = false
-  
+
 
       window.setTimeout(() => {
         this.startCamera()
       }, 2000)
     },
 
-    stopCamera () {
-      this.camera = false
+    stopCamera() {
+      this.camera = 'off'
     },
 
-    startCamera () {
+    startCamera() {
       // use default settings
-      this.camera = {}
+      this.camera = 'auto'
     },
 
-    validate (content) {
-        return firestore
-        .collection("qr")
-        .where("ticketId", "==", content)
-        .get()
-        .then(snapshot => {
-          return new Promise(resolve => {
-                if (!snapshot.empty) {return resolve(true)}
-                else{return resolve(false)}
+    validate(content) {
+      return firestore
+          .collection("qr")
+          .where("ticketId", "==", content)
+          .get()
+          .then(snapshot => {
+            return new Promise(resolve => {
+              if (!snapshot.empty) {
+                return resolve(true)
+              } else {
+                return resolve(false)
+              }
+            });
           });
-        });
     },
 
-    async onInit (promise) {
+    async onInit(promise) {
       this.loading = true
 
       try {
@@ -128,6 +132,7 @@ export default {
 .valid {
   color: green;
 }
+
 .invalid {
   color: red;
 }
