@@ -1,6 +1,9 @@
 <template>
   <div>
-    <p class="decode-result">Last result: <b>{{ result }}</b></p>
+    <p class="decode-result">QR Code: <b>{{ result }}</b></p>
+    <p class="decode-result">Name: <b>{{ name }}</b></p>
+    <p class="decode-result">Email: <b>{{ email }}</b></p>
+    <p class="decode-result">Scanned at: <b>{{ scannedAt }}</b></p>
 
     <QrcodeStream :camera="camera" @decode="onDecode" @init="onInit">
       <div v-show="cameraForzen" class="validation-layer">
@@ -9,8 +12,12 @@
         </div>
 
         <div class="validation-result" v-if="!validating">
-          <div v-if="isValid" class="valid">
+          <div v-if="isValid === 2" class="valid">
             Valid ticket
+          </div>
+
+          <div v-else-if="isValid === 1" class="already__scanned">
+            Already scanned
           </div>
 
           <div v-else class="invalid">
@@ -33,13 +40,17 @@ export default {
   },
   data() {
     return {
-      isValid: false,
+      isValid: 0,
       validating: false,
       camera: 'auto',
       result: null,
 
       loading: false,
-      firstLoad: true
+      firstLoad: true,
+
+      name: '',
+      email: '',
+      scannedAt: ''
     }
   },
 
@@ -75,6 +86,10 @@ export default {
     },
 
     validate(content) {
+      this.name = '';
+      this.email = '';
+      this.scannedAt = '';
+
       return firestore
           .collection("qr")
           .where("ticketId", "==", content)
@@ -82,9 +97,24 @@ export default {
           .then(snapshot => {
             return new Promise(resolve => {
               if (!snapshot.empty) {
-                return resolve(true)
+                if(snapshot.size !== 1) {
+                  return resolve(0)
+                }
+                const doc = snapshot.docs[0];
+
+                this.name = doc.data().name;
+                this.email = doc.data().email;
+
+                if (doc.data().scannedAt) {
+                  this.scannedAt = doc.data().scannedAt.toDate();
+                  return resolve(1)
+                }
+
+                firestore.collection("qr").doc(doc.id).update({scannedAt: new Date()});
+
+                return resolve(2)
               } else {
-                return resolve(false)
+                return resolve(0)
               }
             });
           });
@@ -135,5 +165,9 @@ export default {
 
 .invalid {
   color: red;
+}
+
+.already__scanned {
+  color: orange;
 }
 </style>
